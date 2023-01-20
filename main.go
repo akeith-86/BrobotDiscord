@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -11,8 +11,7 @@ import (
 var (
 	Token     string
 	BotPrefix string
-
-	config *configStruct
+	config    *configStruct
 )
 
 type configStruct struct {
@@ -21,8 +20,8 @@ type configStruct struct {
 }
 
 func ReadConfig() error {
-	fmt.Println("Reading config file...")
-	file, err := ioutil.ReadFile("./config.json")
+	fmt.Println("Reading config file")
+	file, err := os.ReadFile("./config.json")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -92,6 +91,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if m.Content == "<:brobot:1065746958481895474>" {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "<:brobot:1065746958481895474>")
+	}
+
+	if m.Content == BotPrefix+"catjam" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "<a:catjam:1065746950839869551>")
 	}
 }
 
