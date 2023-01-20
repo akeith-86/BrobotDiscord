@@ -80,8 +80,18 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	fmt.Println(m.Author.Username + ": " + m.Content)
+
 	if m.Content == BotPrefix+"ping" {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "pong")
+	}
+
+	if m.Content == BotPrefix+"bros" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "BROS ASSEMBLE! @everyone")
+	}
+
+	if m.Content == "<:brobot:1065746958481895474>" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "<:brobot:1065746958481895474>")
 	}
 }
 
