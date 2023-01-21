@@ -91,6 +91,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	fmt.Println(m.Author.Username + ": " + m.Content)
 
+	if m.Content == BotPrefix+"help" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "This is Brobot, a helpful bot who's also a bro. Here are some commands that I have! \n !help: Shows this output \n !ping: Tests if I'm alive! \n !bros: Assembles the bro team. \n !<:brobot:1065746958481895474>: <:brobot:1065746958481895474> \n !catjam: Summon a cool cat to jam with \n !gpt <question>: Ask me a question, I might have an answer!")
+	}
+
 	if m.Content == BotPrefix+"ping" {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "pong")
 	}
