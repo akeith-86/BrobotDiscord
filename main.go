@@ -1,22 +1,27 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	gogpt "github.com/sashabaranov/go-gpt3"
 )
 
 var (
 	Token     string
 	BotPrefix string
+	GptToken  string
 	config    *configStruct
 )
 
 type configStruct struct {
 	Token     string `json : "Token"`
 	BotPrefix string `json : "BotPrefix"`
+	GptToken  string `json : "GptToken"`
 }
 
 func ReadConfig() error {
@@ -38,23 +43,24 @@ func ReadConfig() error {
 	}
 	Token = config.Token
 	BotPrefix = config.BotPrefix
+	GptToken = config.GptToken
 
 	return nil
 
 }
 
 var BotId string
-var goBot *discordgo.Session
+var broBot *discordgo.Session
 
 func Start() {
-	goBot, err := discordgo.New("Bot " + config.Token)
+	broBot, err := discordgo.New("Bot " + config.Token)
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	u, err := goBot.User("@me")
+	u, err := broBot.User("@me")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -63,9 +69,9 @@ func Start() {
 
 	BotId = u.ID
 
-	goBot.AddHandler(messageHandler)
+	broBot.AddHandler(messageHandler)
 
-	err = goBot.Open()
+	err = broBot.Open()
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -75,6 +81,10 @@ func Start() {
 }
 
 func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+	var resp string
+	cmdCheck := strings.Split(m.Content, " ")
+
 	if m.Author.ID == BotId {
 		return
 	}
@@ -96,6 +106,34 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == BotPrefix+"catjam" {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "<a:catjam:1065746950839869551>")
 	}
+
+	if cmdCheck[0] == BotPrefix+"gpt" {
+
+		userPrompt := strings.Join(strings.Split(m.Content, " ")[1:], " ")
+
+		resp = gpt(userPrompt)
+
+		_, _ = s.ChannelMessageSend(m.ChannelID, resp)
+	}
+}
+
+func gpt(userPrompt string) string {
+	gptClient := gogpt.NewClient(GptToken)
+	ctx := context.Background()
+
+	req := gogpt.CompletionRequest{
+		Model:     gogpt.GPT3TextDavinci003,
+		MaxTokens: 1000,
+		Prompt:    fmt.Sprint(userPrompt),
+	}
+
+	resp, err := gptClient.CreateCompletion(ctx, req)
+	if err != nil {
+		fmt.Println(err.Error())
+		return "An error has occured!"
+	}
+
+	return resp.Choices[0].Text
 }
 
 func main() {
