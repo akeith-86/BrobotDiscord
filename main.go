@@ -119,6 +119,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		_, _ = s.ChannelMessageSend(m.ChannelID, resp)
 	}
+
+	if atMe(m.Content) {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "I heard my name!")
+	}
 }
 
 func gpt(userPrompt string) string {
@@ -138,6 +142,17 @@ func gpt(userPrompt string) string {
 	}
 
 	return resp.Choices[0].Text
+}
+
+func atMe(message string) bool {
+	var i int
+	msgSlice := strings.Split(message, " ")
+	for i = 0; i < len(msgSlice); i++ {
+		if msgSlice[i] == "<@1065749980024938566>" {
+			return true
+		}
+	}
+	return false
 }
 
 func main() {
