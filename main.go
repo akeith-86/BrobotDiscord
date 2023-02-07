@@ -15,13 +15,13 @@ var (
 	Token     string
 	BotPrefix string
 	GptToken  string
-	config    *configStruct
+	config    *ConfigStruct
 )
 
-type configStruct struct {
-	Token     string `json : "Token"`
-	BotPrefix string `json : "BotPrefix"`
-	GptToken  string `json : "GptToken"`
+type ConfigStruct struct {
+	Token     string `json:"Token"`
+	BotPrefix string `json:"BotPrefix"`
+	GptToken  string `json:"GptToken"`
 }
 
 func ReadConfig() error {
@@ -92,11 +92,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println(m.Author.Username + ": " + m.Content)
 
 	if m.Content == BotPrefix+"help" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "This is Brobot, a helpful bot who's also a bro. Here are some commands that I have! \n !help: Shows this output \n !ping: Tests if I'm alive! \n !bros: Assembles the bro team. \n <:brobot:1065746958481895474>: <:brobot:1065746958481895474> \n !catjam: Summon a cool cat to jam with \n !gpt <question>: Ask me a question, I might have an answer!")
-	}
-
-	if m.Content == BotPrefix+"ping" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "pong")
+		_, _ = s.ChannelMessageSend(m.ChannelID, "This is Brobot, a helpful bot who's also a bro. Here are some commands that I have! \n !help: Shows this output \n !bros: Assembles the bro team. \n <:brobot:1065746958481895474>: <:brobot:1065746958481895474> \n !catjam: Summon a cool cat to jam with \n !gpt <question>: Ask me a question, I might have an answer!")
 	}
 
 	if m.Content == BotPrefix+"bros" {
@@ -120,11 +116,12 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		_, _ = s.ChannelMessageSend(m.ChannelID, resp)
 	}
 
-	if atMe(m.Content) {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "I heard my name!")
-	}
+	// if atMe(m.Content) {
+	// 	_, _ = s.ChannelMessageSend(m.ChannelID, "Sup bro.")
+	// }
 }
 
+//gpt takes a string and plugs it into OpenAI's GPT3 chat model. Currently no conversation ability but that's coming! Returns the response as a string.
 func gpt(userPrompt string) string {
 	gptClient := gogpt.NewClient(GptToken)
 	ctx := context.Background()
@@ -144,16 +141,17 @@ func gpt(userPrompt string) string {
 	return resp.Choices[0].Text
 }
 
-func atMe(message string) bool {
-	var i int
-	msgSlice := strings.Split(message, " ")
-	for i = 0; i < len(msgSlice); i++ {
-		if msgSlice[i] == "<@1065749980024938566>" {
-			return true
-		}
-	}
-	return false
-}
+// atMe checks for "@Brobot" in messages. Returns a boolean value.
+// func atMe(message string) bool {
+// 	var i int
+// 	msgSlice := strings.Split(message, " ")
+// 	for i = 0; i < len(msgSlice); i++ {
+// 		if msgSlice[i] == "<@1065749980024938566>" {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 func main() {
 	err := ReadConfig()
@@ -166,5 +164,4 @@ func main() {
 	Start()
 
 	<-make(chan struct{})
-	return
 }
